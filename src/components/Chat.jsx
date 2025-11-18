@@ -9,6 +9,13 @@ export default function Chat({ backendUrl, provider, model }) {
   const [thinking, setThinking] = useState(false)
   const endRef = useRef(null)
 
+  // auto-grow textarea rows up to a cap
+  const [rows, setRows] = useState(1)
+  useEffect(() => {
+    const lines = input.split('\n').length
+    setRows(Math.min(8, Math.max(1, lines)))
+  }, [input])
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streaming])
@@ -71,8 +78,8 @@ export default function Chat({ backendUrl, provider, model }) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-320px)] max-h-[900px]">
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto px-0 sm:px-2 lg:px-4 py-4 space-y-4">
         {messages.map((m, idx) => (
           <div key={idx} className={`max-w-3xl ${m.role === 'user' ? 'ml-auto' : ''}`}>
             <div className={`rounded-2xl border ${m.role === 'user' ? 'bg-blue-500 text-white border-blue-400' : 'bg-white/5 text-blue-100 border-white/10'} p-4` }>
@@ -97,8 +104,8 @@ export default function Chat({ backendUrl, provider, model }) {
         <div ref={endRef} />
       </div>
 
-      <div className="border-t border-white/10 bg-slate-900/60 backdrop-blur px-4 sm:px-6 lg:px-8 py-3">
-        <div className="max-w-3xl">
+      <div className="border-t border-white/10 bg-slate-900/60 backdrop-blur px-2 sm:px-4 lg:px-6 py-3">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl">
           {attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {attachments.map((f, i) => (
@@ -117,7 +124,7 @@ export default function Chat({ backendUrl, provider, model }) {
             <button className="p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
               <Mic size={18} />
             </button>
-            <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={1} placeholder="Message the AI…" className="flex-1 resize-none text-sm bg-white/5 border border-white/10 rounded-md px-3 py-2 text-blue-100 placeholder:text-blue-200/50 outline-none focus:ring-1 focus:ring-blue-400/50" />
+            <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={rows} placeholder="Message the AI…" className="flex-1 resize-none text-sm bg-white/5 border border-white/10 rounded-md px-3 py-2 text-blue-100 placeholder:text-blue-200/50 outline-none focus:ring-1 focus:ring-blue-400/50 max-h-40" />
             <button onClick={onSend} disabled={streaming} className={`px-3 py-2 rounded-md inline-flex items-center gap-2 ${streaming ? 'bg-blue-500/50' : 'bg-blue-500 hover:bg-blue-600'} text-white`}>
               <Send size={18} />
             </button>

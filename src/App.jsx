@@ -58,7 +58,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-blue-50">
+    <div className="min-h-screen flex flex-col bg-slate-900 text-blue-50">
       <Header
         mode={mode}
         setMode={setMode}
@@ -75,11 +75,12 @@ function App() {
         onOpenDev={() => setDevOpen(true)}
       />
 
-      <div className="relative px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
+      {/* Main content area uses all remaining height */}
+      <main className="flex-1 min-h-0 px-4 sm:px-6 lg:px-8 pb-4">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl h-full min-h-0">
           <Chat backendUrl={backendUrl} provider={provider} model={model} />
         </div>
-      </div>
+      </main>
 
       <DevPanel open={devOpen} onClose={() => setDevOpen(false)} backendUrl={backendUrl} />
       <MultiAgentPanel open={multiOpen} onClose={() => setMultiOpen(false)} backendUrl={backendUrl} onRun={onRunAgents} />
