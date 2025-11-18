@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Bot, Settings, History, ChevronDown, Users2, FileCode2, Wrench } from 'lucide-react'
 import Spline from '@splinetool/react-spline'
 
 export default function Header({ mode, setMode, provider, model, onOpenSettings, onOpenHistory, onOpenMultiAgent, onOpenEditor, onOpenDev, providers, modelsByProvider, onProviderChange, onModelChange }) {
   const [showModels, setShowModels] = useState(false)
   const [showProviders, setShowProviders] = useState(false)
+  const provRef = useRef(null)
+  const modelRef = useRef(null)
 
   const modes = [
     { id: 'chat', label: 'Chat' },
@@ -17,12 +19,14 @@ export default function Header({ mode, setMode, provider, model, onOpenSettings,
   ]
 
   useEffect(() => {
-    const close = () => {
-      setShowModels(false)
-      setShowProviders(false)
+    const close = (e) => {
+      if (!provRef.current?.contains(e.target)) setShowProviders(false)
+      if (!modelRef.current?.contains(e.target)) setShowModels(false)
     }
+    const onEsc = (e) => { if (e.key === 'Escape') { setShowModels(false); setShowProviders(false) } }
     window.addEventListener('click', close)
-    return () => window.removeEventListener('click', close)
+    window.addEventListener('keydown', onEsc)
+    return () => { window.removeEventListener('click', close); window.removeEventListener('keydown', onEsc) }
   }, [])
 
   const currentModels = modelsByProvider[provider] || []
@@ -47,29 +51,29 @@ export default function Header({ mode, setMode, provider, model, onOpenSettings,
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <button onClick={(e) => { e.stopPropagation(); setShowProviders(!showProviders) }} className="text-sm text-blue-100/90 hover:text-white border border-white/10 bg-white/5 px-3 py-1.5 rounded-md inline-flex items-center gap-2">
-                <span className="hidden sm:block">{provider.toUpperCase()}</span>
+            <div className="relative" ref={provRef}>
+              <button onClick={(e) => { e.stopPropagation(); setShowProviders(!showProviders) }} className="text-sm text-blue-100/90 hover:text-white border border-white/10 bg-white/5 px-3 py-1.5 rounded-md inline-flex items-center gap-2 max-w-[50vw]">
+                <span className="hidden sm:block truncate">{provider.toUpperCase()}</span>
                 <ChevronDown size={16} />
               </button>
               {showProviders && (
-                <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 backdrop-blur border border-white/10 rounded-md overflow-hidden z-10">
+                <div className="absolute right-0 mt-2 min-w-[12rem] max-w-[calc(100vw-1rem)] bg-slate-900/90 backdrop-blur border border-white/10 rounded-md overflow-auto z-40">
                   {providers.map((p) => (
-                    <button key={p} onClick={() => { onProviderChange(p); setShowProviders(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 ${p === provider ? 'text-white' : 'text-blue-200/80'}`}>{p.toUpperCase()}</button>
+                    <button key={p} onClick={() => { onProviderChange(p); setShowProviders(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 break-words ${p === provider ? 'text-white' : 'text-blue-200/80'}`}>{p.toUpperCase()}</button>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="relative">
-              <button onClick={(e) => { e.stopPropagation(); setShowModels(!showModels) }} className="text-sm text-blue-100/90 hover:text-white border border-white/10 bg-white/5 px-3 py-1.5 rounded-md inline-flex items-center gap-2 max-w-[220px]">
+            <div className="relative" ref={modelRef}>
+              <button onClick={(e) => { e.stopPropagation(); setShowModels(!showModels) }} className="text-sm text-blue-100/90 hover:text-white border border-white/10 bg-white/5 px-3 py-1.5 rounded-md inline-flex items-center gap-2 max-w-[60vw] sm:max-w-[220px]">
                 <span className="truncate">{model}</span>
                 <ChevronDown size={16} />
               </button>
               {showModels && (
-                <div className="absolute right-0 mt-2 max-h-72 overflow-auto w-72 bg-slate-900/90 backdrop-blur border border-white/10 rounded-md z-10">
+                <div className="absolute right-0 mt-2 max-h-72 overflow-auto w-[min(18rem,calc(100vw-1rem))] bg-slate-900/90 backdrop-blur border border-white/10 rounded-md z-40">
                   {currentModels.map((m) => (
-                    <button key={m.id} title={m.display_name} onClick={() => { onModelChange(m.id); setShowModels(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 ${m.id === model ? 'text-white' : 'text-blue-200/80'}`}>
+                    <button key={m.id} title={m.display_name} onClick={() => { onModelChange(m.id); setShowModels(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 break-words ${m.id === model ? 'text-white' : 'text-blue-200/80'}`}>
                       {m.display_name}
                     </button>
                   ))}

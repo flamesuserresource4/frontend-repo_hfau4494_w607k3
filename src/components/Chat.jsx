@@ -1,5 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Mic, Paperclip, Send, Loader2 } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+
+gsap.registerPlugin(ScrollToPlugin)
 
 export default function Chat({ backendUrl, provider, model }) {
   const [input, setInput] = useState('')
@@ -8,6 +12,7 @@ export default function Chat({ backendUrl, provider, model }) {
   const [streaming, setStreaming] = useState(false)
   const [thinking, setThinking] = useState(false)
   const endRef = useRef(null)
+  const scrollerRef = useRef(null)
 
   // auto-grow textarea rows up to a cap
   const [rows, setRows] = useState(1)
@@ -16,9 +21,20 @@ export default function Chat({ backendUrl, provider, model }) {
     setRows(Math.min(8, Math.max(1, lines)))
   }, [input])
 
+  // Smooth scroll to bottom on new content
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!scrollerRef.current) return
+    gsap.to(scrollerRef.current, { scrollTo: scrollerRef.current.scrollHeight, duration: 0.35, ease: 'power2.out' })
   }, [messages, streaming])
+
+  // Animate newest message
+  useLayoutEffect(() => {
+    const nodes = scrollerRef.current?.querySelectorAll('.msg') || []
+    const last = nodes[nodes.length - 1]
+    if (last) {
+      gsap.fromTo(last, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'power2.out' })
+    }
+  }, [messages])
 
   const onAttach = (e) => {
     const files = Array.from(e.target.files || [])
@@ -79,15 +95,16 @@ export default function Chat({ backendUrl, provider, model }) {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex-1 min-h-0 overflow-y-auto px-0 sm:px-2 lg:px-4 py-4 space-y-4">
+      {/* Scrollable conversation area */}
+      <div ref={scrollerRef} className="flex-1 min-h-0 overflow-y-auto px-0 sm:px-2 lg:px-4 py-4 space-y-4 overscroll-contain">
         {messages.map((m, idx) => (
-          <div key={idx} className={`max-w-3xl ${m.role === 'user' ? 'ml-auto' : ''}`}>
+          <div key={idx} className={`msg max-w-3xl ${m.role === 'user' ? 'ml-auto' : ''}`}>
             <div className={`rounded-2xl border ${m.role === 'user' ? 'bg-blue-500 text-white border-blue-400' : 'bg-white/5 text-blue-100 border-white/10'} p-4` }>
-              <div className="whitespace-pre-wrap text-sm leading-6">{m.content}</div>
+              <div className="whitespace-pre-wrap break-words text-sm leading-6">{m.content}</div>
               {m.attachments?.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {m.attachments.map((a, i) => (
-                    <span key={i} className="text-xs px-2 py-1 rounded bg-black/20 border border-white/10">{a.name}</span>
+                    <span key={i} className="text-xs px-2 py-1 rounded bg-black/20 border border-white/10 break-all">{a.name}</span>
                   ))}
                 </div>
               )}
@@ -104,12 +121,13 @@ export default function Chat({ backendUrl, provider, model }) {
         <div ref={endRef} />
       </div>
 
-      <div className="border-t border-white/10 bg-slate-900/60 backdrop-blur px-2 sm:px-4 lg:px-6 py-3">
+      {/* Composer - respects safe areas and keyboard height */}
+      <div className="border-t border-white/10 bg-slate-900/60 backdrop-blur px-2 sm:px-4 lg:px-6 py-2" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + var(--kb-height, 0px))' }}>
         <div className="mx-auto max-w-3xl lg:max-w-4xl">
           {attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {attachments.map((f, i) => (
-                <div key={i} className="text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-blue-200/80">
+                <div key={i} className="text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-blue-200/80 break-all">
                   {f.name}
                 </div>
               ))}
@@ -117,16 +135,23 @@ export default function Chat({ backendUrl, provider, model }) {
           )}
 
           <div className="flex items-end gap-2">
-            <label className="p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white cursor-pointer">
+            <label className="h-11 w-11 shrink-0 grid place-items-center rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
               <Paperclip size={18} />
               <input type="file" className="hidden" multiple onChange={onAttach} />
             </label>
-            <button className="p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
+            <button className="h-11 w-11 shrink-0 grid place-items-center rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
               <Mic size={18} />
             </button>
-            <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={rows} placeholder="Message the AI…" className="flex-1 resize-none text-sm bg-white/5 border border-white/10 rounded-md px-3 py-2 text-blue-100 placeholder:text-blue-200/50 outline-none focus:ring-1 focus:ring-blue-400/50 max-h-40" />
-            <button onClick={onSend} disabled={streaming} className={`px-3 py-2 rounded-md inline-flex items-center gap-2 ${streaming ? 'bg-blue-500/50' : 'bg-blue-500 hover:bg-blue-600'} text-white`}>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              rows={rows}
+              placeholder="Message the AI…"
+              className="flex-1 resize-none text-sm bg-white/5 border border-white/10 rounded-md px-3 py-2 text-blue-100 placeholder:text-blue-200/50 outline-none focus:ring-1 focus:ring-blue-400/50 max-h-40"
+            />
+            <button onClick={onSend} disabled={streaming} className={`h-11 px-4 rounded-md inline-flex items-center justify-center gap-2 ${streaming ? 'bg-blue-500/50' : 'bg-blue-500 hover:bg-blue-600'} text-white`}>
               <Send size={18} />
+              <span className="hidden sm:inline text-sm">Send</span>
             </button>
           </div>
         </div>
