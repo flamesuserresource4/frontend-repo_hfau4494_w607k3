@@ -4,6 +4,8 @@ import Chat from './components/Chat'
 import SettingsSheet from './components/SettingsSheet'
 import HistoryDrawer from './components/HistoryDrawer'
 import DevPanel from './components/DevPanel'
+import MultiAgentPanel from './components/MultiAgentPanel'
+import EditorPanel from './components/EditorPanel'
 
 function App() {
   const backendUrl = useMemo(() => import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000', [])
@@ -14,6 +16,8 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [devOpen, setDevOpen] = useState(false)
+  const [multiOpen, setMultiOpen] = useState(false)
+  const [editorOpen, setEditorOpen] = useState(false)
 
   // Load saved provider config if any
   useEffect(() => {
@@ -48,6 +52,11 @@ function App() {
 
   const providers = ['openrouter', 'openai', 'gemini', 'claude', 'grok', 'minimax', 'custom']
 
+  // Multi-agent run handler (mock: just logs a message to chat)
+  const onRunAgents = async ({ mode, agents }) => {
+    console.log('Running agents', mode, agents)
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-blue-50">
       <Header
@@ -61,6 +70,9 @@ function App() {
         onModelChange={(m) => setModel(m)}
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenHistory={() => setHistoryOpen(true)}
+        onOpenMultiAgent={() => setMultiOpen(true)}
+        onOpenEditor={() => setEditorOpen(true)}
+        onOpenDev={() => setDevOpen(true)}
       />
 
       <div className="relative px-4 sm:px-6 lg:px-8">
@@ -69,15 +81,9 @@ function App() {
         </div>
       </div>
 
-      {/* Dev panel toggle for private server flows */}
-      <button
-        onClick={() => setDevOpen(true)}
-        className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg px-4 py-2 text-sm"
-      >
-        Dev
-      </button>
-
       <DevPanel open={devOpen} onClose={() => setDevOpen(false)} backendUrl={backendUrl} />
+      <MultiAgentPanel open={multiOpen} onClose={() => setMultiOpen(false)} backendUrl={backendUrl} onRun={onRunAgents} />
+      <EditorPanel open={editorOpen} onClose={() => setEditorOpen(false)} backendUrl={backendUrl} />
 
       <SettingsSheet
         open={settingsOpen}

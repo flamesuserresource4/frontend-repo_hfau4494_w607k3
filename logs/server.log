@@ -2,9 +2,10 @@
 > vibe-generated-app@1.0.0 dev
 > vite
 
-Re-optimizing dependencies because lockfile has changed
 
-  VITE v5.4.20  ready in 223 ms
+  VITE v5.4.20  ready in 214 ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Network: http://172.20.3.84:3000/
+7:08:29 PM [vite] ✨ new dependencies optimized: @uiw/react-codemirror, @codemirror/theme-one-dark, @codemirror/lang-javascript, @codemirror/lang-python
+7:08:29 PM [vite] ✨ optimized dependencies changed. reloading

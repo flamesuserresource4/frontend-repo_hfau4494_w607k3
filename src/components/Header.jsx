@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Bot, Settings, History, ChevronDown } from 'lucide-react'
+import { Bot, Settings, History, ChevronDown, Users2, FileCode2, Wrench } from 'lucide-react'
 import Spline from '@splinetool/react-spline'
 
-export default function Header({ mode, setMode, provider, model, onOpenSettings, onOpenHistory, providers, modelsByProvider, onProviderChange, onModelChange }) {
+export default function Header({ mode, setMode, provider, model, onOpenSettings, onOpenHistory, onOpenMultiAgent, onOpenEditor, onOpenDev, providers, modelsByProvider, onProviderChange, onModelChange }) {
   const [showModels, setShowModels] = useState(false)
   const [showProviders, setShowProviders] = useState(false)
 
@@ -80,6 +80,15 @@ export default function Header({ mode, setMode, provider, model, onOpenSettings,
             <button onClick={onOpenHistory} className="ml-2 p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
               <History size={18} />
             </button>
+            <button onClick={onOpenMultiAgent} title="Multi-Agent" className="p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
+              <Users2 size={18} />
+            </button>
+            <button onClick={onOpenEditor} title="Editor" className="p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
+              <FileCode2 size={18} />
+            </button>
+            <button onClick={onOpenDev} title="Dev" className="p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
+              <Wrench size={18} />
+            </button>
             <button onClick={onOpenSettings} className="p-2 rounded-md bg-white/5 border border-white/10 text-blue-100 hover:text-white">
               <Settings size={18} />
             </button>
@@ -88,8 +97,8 @@ export default function Header({ mode, setMode, provider, model, onOpenSettings,
 
         <div className="px-4 sm:px-6 lg:px-8 pb-6">
           <div className="max-w-3xl">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">{modes.find(m => m.id === mode)?.label}</h1>
-            <p className="text-blue-200/80 text-sm">Unified chat for OpenRouter, OpenAI, Claude, Gemini, and more. Switch modes for Dev, DevOps, Testing, Marketing, or try multi‑agent.</p>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">Multi-Provider LLM Workbench</h1>
+            <p className="text-blue-200/80 text-sm">Unified chat across providers with dev workflows, code editing, and multi‑agent modes.</p>
           </div>
         </div>
       </div>
