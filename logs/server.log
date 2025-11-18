@@ -2,10 +2,9 @@
 > vibe-generated-app@1.0.0 dev
 > vite
 
+Re-optimizing dependencies because lockfile has changed
 
-  VITE v5.4.20  ready in 240 ms
+  VITE v5.4.20  ready in 223 ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Network: http://172.20.3.84:3000/
-6:12:53 PM [vite] ✨ new dependencies optimized: lucide-react, @splinetool/react-spline
-6:12:53 PM [vite] ✨ optimized dependencies changed. reloading

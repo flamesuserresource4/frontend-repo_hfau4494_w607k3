@@ -3,6 +3,7 @@ import Header from './components/Header'
 import Chat from './components/Chat'
 import SettingsSheet from './components/SettingsSheet'
 import HistoryDrawer from './components/HistoryDrawer'
+import DevPanel from './components/DevPanel'
 
 function App() {
   const backendUrl = useMemo(() => import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000', [])
@@ -12,6 +13,7 @@ function App() {
   const [model, setModel] = useState('openrouter/openai/gpt-4o')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [devOpen, setDevOpen] = useState(false)
 
   // Load saved provider config if any
   useEffect(() => {
@@ -66,6 +68,16 @@ function App() {
           <Chat backendUrl={backendUrl} provider={provider} model={model} />
         </div>
       </div>
+
+      {/* Dev panel toggle for private server flows */}
+      <button
+        onClick={() => setDevOpen(true)}
+        className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg px-4 py-2 text-sm"
+      >
+        Dev
+      </button>
+
+      <DevPanel open={devOpen} onClose={() => setDevOpen(false)} backendUrl={backendUrl} />
 
       <SettingsSheet
         open={settingsOpen}
